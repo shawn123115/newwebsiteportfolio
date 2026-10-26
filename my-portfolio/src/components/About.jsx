@@ -20,7 +20,7 @@ const skills = [
 
 // The images you want to display in the gallery
 const aboutImages = [
-    { src: '/workspace.jpg', alt: 'Workspace' },
+    { src: '/public/workspace.jpg', alt: 'Workspace' },
     { src: '/workspace2.jpg', alt: 'Working' },
     { src: '/workspace3.jpg', alt: 'Hobby' }
 ]
