@@ -12,16 +12,6 @@ import Loader from './components/Loader'
 import VoiceGreeting from "./components/VoiceGreeting";
 
 
-function App() {
-  return (
-    <>
-      <VoiceGreeting />
-
-      {/* Your existing portfolio content */}
-    </>
-  );
-}
-
 
 // --- SCROLL TO TOP BUTTON COMPONENT ---
 const ScrollToTop = () => {
@@ -320,6 +310,8 @@ export default function App() {
     const t = setTimeout(() => setLoading(false), 1600)
     return () => clearTimeout(t)
   }, [])
+  return (<>
+    <VoiceGreeting /></>)
 
   useEffect(() => {
     if (loading) return
