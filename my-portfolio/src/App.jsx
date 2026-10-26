@@ -346,7 +346,8 @@ export default function App() {
               inset: 0,
               zIndex: 0,
               pointerEvents: 'none',
-              backgroundImage: theme === 'dark' ? 'url("/ancient-tree.jpg")' : 'url("/light-tree.jpg")',
+              backgroundImage: theme === 'dark' ? `url("${import.meta.env.BASE_URL}ancient-tree.jpg")`
+                : `url("${import.meta.env.BASE_URL}light-tree.jpg")`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat',
