@@ -1,6 +1,8 @@
+
 import { useEffect, useState, useRef, useMemo } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowUp } from 'lucide-react' // Added ArrowUp
+import { ArrowUp } from 'lucide-react'
+
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import About from './components/About'
@@ -9,24 +11,20 @@ import Contact from './components/Contact'
 import Footer from './components/Footer'
 import CursorGlow from './components/CursorGlow'
 import Loader from './components/Loader'
-import VoiceGreeting from "./components/VoiceGreeting";
-
-
+import VoiceGreeting from './components/VoiceGreeting'
 
 // --- SCROLL TO TOP BUTTON COMPONENT ---
 const ScrollToTop = () => {
   const [isVisible, setIsVisible] = useState(false)
 
-  // Show button when page is scrolled down 400px
   useEffect(() => {
     const toggleVisibility = () => {
-      if (window.scrollY > 400) {
-        setIsVisible(true)
-      } else {
-        setIsVisible(false)
-      }
+      setIsVisible(window.scrollY > 400)
     }
+
     window.addEventListener('scroll', toggleVisibility)
+    toggleVisibility()
+
     return () => window.removeEventListener('scroll', toggleVisibility)
   }, [])
 
@@ -44,7 +42,11 @@ const ScrollToTop = () => {
           initial={{ opacity: 0, scale: 0.5, y: 50 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.5, y: 50 }}
-          whileHover={{ scale: 1.1, y: -5, boxShadow: '0 0 25px var(--accent)' }}
+          whileHover={{
+            scale: 1.1,
+            y: -5,
+            boxShadow: '0 0 25px var(--accent)'
+          }}
           whileTap={{ scale: 0.9 }}
           onClick={scrollToTop}
           style={{
@@ -80,21 +82,31 @@ const WeatherCanvas = ({ season, theme }) => {
 
   useEffect(() => {
     const canvas = canvasRef.current
+    if (!canvas) return
+
     const ctx = canvas.getContext('2d', { alpha: true })
+    if (!ctx) return
+
     let animationFrameId
     let particles = []
-    let w, h
+    let w = 0
+    let h = 0
+
     const dpr = window.devicePixelRatio || 1
 
     const resize = () => {
       w = window.innerWidth
       h = window.innerHeight
+
       canvas.width = w * dpr
       canvas.height = h * dpr
       canvas.style.width = `${w}px`
       canvas.style.height = `${h}px`
-      ctx.scale(dpr, dpr)
+
+      // Reset transform so repeated resizes don't compound scaling.
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
     }
+
     window.addEventListener('resize', resize)
     resize()
 
@@ -102,6 +114,7 @@ const WeatherCanvas = ({ season, theme }) => {
       constructor() {
         this.reset(true)
       }
+
       reset(init = false) {
         this.x = Math.random() * w
 
@@ -136,7 +149,12 @@ const WeatherCanvas = ({ season, theme }) => {
             this.twinkleSpeed = Math.random() * 0.05 + 0.02
             this.phase = Math.random() * Math.PI * 2
             this.wiggleSpeed = Math.random() * 0.05 + 0.02
-            this.color = theme === 'light' ? 'rgba(255, 140, 0,' : (Math.random() > 0.5 ? 'rgba(100, 255, 255,' : 'rgba(255, 215, 0,')
+            this.color =
+              theme === 'light'
+                ? 'rgba(255, 140, 0,'
+                : Math.random() > 0.5
+                  ? 'rgba(100, 255, 255,'
+                  : 'rgba(255, 215, 0,'
           }
         } else {
           this.y = init ? Math.random() * h : -20
@@ -148,6 +166,7 @@ const WeatherCanvas = ({ season, theme }) => {
           this.type = 'star'
         }
       }
+
       update() {
         if (season === 'autumn' && this.type === 'bee') {
           this.y += this.speedY
@@ -176,19 +195,28 @@ const WeatherCanvas = ({ season, theme }) => {
             this.x += Math.sin(this.y * 0.01) * 1.5
           }
 
-          if (this.y > h + 20 || this.x > w + 20 || this.x < -20) {
+          if (
+            this.y > h + 20 ||
+            this.x > w + 20 ||
+            this.x < -20
+          ) {
             this.reset()
             this.x = Math.random() * w
           }
         } else if (season === 'faded') {
           this.twinkleSpeed += 0.01
-          this.currentOpacity = this.opacity + Math.sin(this.twinkleSpeed) * 0.2
+          this.currentOpacity =
+            this.opacity + Math.sin(this.twinkleSpeed) * 0.2
         }
       }
+
       draw() {
         if (this.type === 'rain') {
           ctx.moveTo(this.x, this.y)
-          ctx.lineTo(this.x + this.speedX * 2, this.y + this.size)
+          ctx.lineTo(
+            this.x + this.speedX * 2,
+            this.y + this.size
+          )
         } else if (this.type === 'snow') {
           ctx.moveTo(this.x, this.y)
           ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2)
@@ -197,13 +225,22 @@ const WeatherCanvas = ({ season, theme }) => {
           ctx.translate(this.x, this.y)
           ctx.rotate((this.rotation * Math.PI) / 180)
           ctx.beginPath()
-          ctx.ellipse(0, 0, this.size, this.size / 2, 0, 0, Math.PI * 2)
-          ctx.fillStyle = theme === 'light' ? 'rgba(200, 80, 0, 0.6)' : 'rgba(255, 140, 0, 0.8)'
+          ctx.ellipse(
+            0, 0,
+            this.size,
+            this.size / 2,
+            0, 0,
+            Math.PI * 2
+          )
+          ctx.fillStyle =
+            theme === 'light'
+              ? 'rgba(200, 80, 0, 0.6)'
+              : 'rgba(255, 140, 0, 0.8)'
           ctx.fill()
           ctx.restore()
         } else if (this.type === 'bee') {
           ctx.beginPath()
-          ctx.shadowBlur = 15 + (this.opacity * 10)
+          ctx.shadowBlur = 15 + this.opacity * 10
           ctx.shadowColor = `${this.color}${this.opacity})`
           ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2)
           ctx.fillStyle = `${this.color}${this.opacity})`
@@ -211,7 +248,13 @@ const WeatherCanvas = ({ season, theme }) => {
           ctx.shadowBlur = 0
 
           ctx.beginPath()
-          ctx.arc(this.x, this.y, this.size * 0.4, 0, Math.PI * 2)
+          ctx.arc(
+            this.x,
+            this.y,
+            this.size * 0.4,
+            0,
+            Math.PI * 2
+          )
           ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`
           ctx.fill()
         } else {
@@ -221,7 +264,13 @@ const WeatherCanvas = ({ season, theme }) => {
       }
     }
 
-    const counts = { rain: 120, snow: 80, autumn: 100, faded: 60 }
+    const counts = {
+      rain: 120,
+      snow: 80,
+      autumn: 100,
+      faded: 60
+    }
+
     const count = counts[season] || 50
 
     for (let i = 0; i < count; i++) {
@@ -232,17 +281,24 @@ const WeatherCanvas = ({ season, theme }) => {
       ctx.clearRect(0, 0, w, h)
 
       if (season === 'rain') {
-        ctx.strokeStyle = theme === 'light' ? 'rgba(100, 150, 255, 0.6)' : 'rgba(150, 180, 255, 0.4)'
+        ctx.strokeStyle =
+          theme === 'light'
+            ? 'rgba(100, 150, 255, 0.6)'
+            : 'rgba(150, 180, 255, 0.4)'
         ctx.lineWidth = 1.5
         ctx.lineCap = 'round'
         ctx.beginPath()
       } else if (season === 'snow') {
-        ctx.fillStyle = theme === 'light' ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.8)'
+        ctx.fillStyle =
+          theme === 'light'
+            ? 'rgba(255, 255, 255, 0.9)'
+            : 'rgba(255, 255, 255, 0.8)'
         ctx.beginPath()
-      } else if (season === 'autumn') {
-        // Handled in draw
-      } else {
-        ctx.fillStyle = theme === 'light' ? 'rgba(0, 0, 0, 0.2)' : 'rgba(255, 255, 255, 0.6)'
+      } else if (season !== 'autumn' && season !== 'faded') {
+        ctx.fillStyle =
+          theme === 'light'
+            ? 'rgba(0, 0, 0, 0.2)'
+            : 'rgba(255, 255, 255, 0.6)'
       }
 
       for (let i = 0; i < particles.length; i++) {
@@ -252,9 +308,22 @@ const WeatherCanvas = ({ season, theme }) => {
           particles[i].draw()
         } else if (season === 'faded') {
           ctx.beginPath()
-          const starColor = theme === 'light' ? '0, 0, 0' : '255, 255, 255'
-          ctx.fillStyle = `rgba(${starColor}, ${Math.max(0, particles[i].currentOpacity || 0.5)})`
-          ctx.arc(particles[i].x, particles[i].y, particles[i].size, 0, Math.PI * 2)
+
+          const starColor =
+            theme === 'light' ? '0, 0, 0' : '255, 255, 255'
+
+          ctx.fillStyle = `rgba(${starColor}, ${Math.max(
+            0,
+            particles[i].currentOpacity || 0.5
+          )})`
+
+          ctx.arc(
+            particles[i].x,
+            particles[i].y,
+            particles[i].size,
+            0,
+            Math.PI * 2
+          )
           ctx.fill()
         } else {
           particles[i].draw()
@@ -278,6 +347,7 @@ const WeatherCanvas = ({ season, theme }) => {
   return (
     <canvas
       ref={canvasRef}
+      aria-hidden="true"
       style={{
         position: 'fixed',
         top: 0,
@@ -293,13 +363,23 @@ const WeatherCanvas = ({ season, theme }) => {
   )
 }
 
-const MemoizedWeather = ({ season, theme }) => useMemo(() => <WeatherCanvas season={season} theme={theme} />, [season, theme])
+const MemoizedWeather = ({ season, theme }) => {
+  return useMemo(
+    () => <WeatherCanvas season={season} theme={theme} />,
+    [season, theme]
+  )
+}
 
+// --- MAIN APP ---
 export default function App() {
   const [loading, setLoading] = useState(true)
   const [theme, setTheme] = useState('dark')
 
-  const seasons = useMemo(() => ['rain', 'snow', 'autumn', 'faded'], [])
+  const seasons = useMemo(
+    () => ['rain', 'snow', 'autumn', 'faded'],
+    []
+  )
+
   const [currentSeason, setCurrentSeason] = useState('faded')
 
   useEffect(() => {
@@ -310,14 +390,15 @@ export default function App() {
     const t = setTimeout(() => setLoading(false), 1600)
     return () => clearTimeout(t)
   }, [])
-  return (<>
-    <VoiceGreeting /></>)
 
+  // Cycle through seasonal effects after the loader finishes.
   useEffect(() => {
     if (loading) return
+
     const interval = setInterval(() => {
       setCurrentSeason(prev => {
-        const nextIndex = (seasons.indexOf(prev) + 1) % seasons.length
+        const currentIndex = seasons.indexOf(prev)
+        const nextIndex = (currentIndex + 1) % seasons.length
         return seasons[nextIndex]
       })
     }, 12000)
@@ -325,89 +406,120 @@ export default function App() {
     return () => clearInterval(interval)
   }, [loading, seasons])
 
-  const toggleTheme = () => setTheme(t => (t === 'dark' ? 'light' : 'dark'))
+  const toggleTheme = () => {
+    setTheme(t => (t === 'dark' ? 'light' : 'dark'))
+  }
 
   return (
     <>
+      {/* Voice greeting must not replace the portfolio UI. */}
+      <VoiceGreeting />
+
       <AnimatePresence mode="wait">
         {loading && <Loader key="loader" />}
       </AnimatePresence>
 
       {!loading && (
         <>
+          {/* Background image */}
           <motion.div
             key={theme}
             initial={{ opacity: 0 }}
             animate={{
-              opacity: currentSeason === 'autumn' || currentSeason === 'faded' ? 0.9 : 0.3,
+              opacity:
+                currentSeason === 'autumn' ||
+                  currentSeason === 'faded'
+                  ? 0.9
+                  : 0.3,
               scale: currentSeason === 'autumn' ? 1.05 : 1
             }}
             transition={{
               opacity: { duration: 2 },
-              scale: { duration: 15, repeat: Infinity, ease: 'easeInOut' }
+              scale: {
+                duration: 15,
+                repeat: Infinity,
+                ease: 'easeInOut'
+              }
             }}
             style={{
               position: 'fixed',
               inset: 0,
               zIndex: 0,
               pointerEvents: 'none',
-              backgroundImage: theme === 'dark' ? `url("${import.meta.env.BASE_URL}ancient-tree.jpg")`
-                : `url("${import.meta.env.BASE_URL}light-tree.jpg")`,
+              backgroundImage:
+                theme === 'dark'
+                  ? `url("${import.meta.env.BASE_URL}ancient-tree.jpg")`
+                  : `url("${import.meta.env.BASE_URL}light-tree.jpg")`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat',
-              filter: theme === 'dark'
-                ? 'brightness(1.2) contrast(1.2) saturate(1.5) drop-shadow(0 0 50px rgba(100, 255, 255, 0.4))'
-                : 'brightness(1.1) contrast(1.1) saturate(1.3) drop-shadow(0 0 60px rgba(255, 215, 0, 0.5))',
-              mixBlendMode: theme === 'dark' ? 'screen' : 'normal',
+              filter:
+                theme === 'dark'
+                  ? 'brightness(1.2) contrast(1.2) saturate(1.5) drop-shadow(0 0 50px rgba(100, 255, 255, 0.4))'
+                  : 'brightness(1.1) contrast(1.1) saturate(1.3) drop-shadow(0 0 60px rgba(255, 215, 0, 0.5))',
+              mixBlendMode: theme === 'dark' ? 'screen' : 'normal'
             }}
           />
 
-          <div style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 0,
-            pointerEvents: 'none',
-            background: theme === 'dark'
-              ? 'radial-gradient(circle at 50% 20%, rgba(108, 123, 255, 0.25) 0%, transparent 60%)'
-              : 'radial-gradient(circle at 70% 15%, rgba(255, 230, 150, 0.4) 0%, transparent 60%)',
-            opacity: currentSeason === 'autumn' ? 1 : 0.6,
-            transition: 'opacity 2s ease-in-out, background 0.5s ease'
-          }} />
+          {/* Background glow */}
+          <div
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 0,
+              pointerEvents: 'none',
+              background:
+                theme === 'dark'
+                  ? 'radial-gradient(circle at 50% 20%, rgba(108, 123, 255, 0.25) 0%, transparent 60%)'
+                  : 'radial-gradient(circle at 70% 15%, rgba(255, 230, 150, 0.4) 0%, transparent 60%)',
+              opacity: currentSeason === 'autumn' ? 1 : 0.6,
+              transition:
+                'opacity 2s ease-in-out, background 0.5s ease'
+            }}
+          />
 
-          <MemoizedWeather season={currentSeason} theme={theme} />
+          {/* Seasonal particles */}
+          <MemoizedWeather
+            season={currentSeason}
+            theme={theme}
+          />
 
+          {/* Background gradient overlay */}
           <div
             style={{
               position: 'fixed',
               inset: 0,
               zIndex: 3,
               pointerEvents: 'none',
-              background: theme === 'dark'
-                ? 'linear-gradient(to bottom, rgba(10,10,15,0.3) 0%, rgba(10,10,15,0.95) 45vh, var(--bg) 100%)'
-                : 'linear-gradient(to bottom, rgba(248,248,252,0.3) 0%, rgba(248,248,252,0.95) 45vh, var(--bg) 100%)',
+              background:
+                theme === 'dark'
+                  ? 'linear-gradient(to bottom, rgba(10,10,15,0.3) 0%, rgba(10,10,15,0.95) 45vh, var(--bg) 100%)'
+                  : 'linear-gradient(to bottom, rgba(248,248,252,0.3) 0%, rgba(248,248,252,0.95) 45vh, var(--bg) 100%)'
             }}
           />
 
           <CursorGlow />
 
-          {/* SCROLL TO TOP BUTTON IS ADDED HERE */}
           <ScrollToTop />
 
+          {/* Main portfolio content */}
           <div style={{ position: 'relative', zIndex: 10 }}>
-            <Navbar theme={theme} toggleTheme={toggleTheme} />
+            <Navbar
+              theme={theme}
+              toggleTheme={toggleTheme}
+            />
+
             <main>
               <Hero />
               <About />
               <Projects />
               <Contact />
             </main>
+
             <Footer />
           </div>
         </>
       )}
-      export default App;
     </>
   )
 }
-
