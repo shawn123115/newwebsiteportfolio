@@ -9,6 +9,19 @@ import Contact from './components/Contact'
 import Footer from './components/Footer'
 import CursorGlow from './components/CursorGlow'
 import Loader from './components/Loader'
+import VoiceGreeting from "./components/VoiceGreeting";
+
+
+function App() {
+  return (
+    <>
+      <VoiceGreeting />
+
+      {/* Your existing portfolio content */}
+    </>
+  );
+}
+
 
 // --- SCROLL TO TOP BUTTON COMPONENT ---
 const ScrollToTop = () => {
@@ -401,6 +414,8 @@ export default function App() {
           </div>
         </>
       )}
+      export default App;
     </>
   )
 }
+
