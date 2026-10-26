@@ -191,7 +191,7 @@ function OrbVisual() {
                 }}
             >
                 <img
-                    src={`${import.meta.env.BASE_URL}workspace3.jpg`}
+                    src={`${import.meta.env.BASE_URL}profile.jpg`}
                     alt="Professional Portrait"
                     style={{
                         width: '100%',
